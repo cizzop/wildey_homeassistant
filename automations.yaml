@@ -1,0 +1,53 @@
+ - alias: Turn off all lights when not home
+   trigger:
+     entity_id: group.all_devices
+     from: home
+     platform: state
+     to: not_home
+   action:
+     service: light.turn_off
+     entity_id: group.bedroomlights
+
+ - alias: Turn On Stoop Light At Sunset
+   trigger:
+     platform: sun
+     event: sunset
+     offset: "-00:30:00"
+   action:
+     service: light.turn_on
+     entity_id: light.Stoop_Light
+
+ - alias: Turn Off Stoop Light At Sunrise
+   trigger:
+     platform: sun
+     event: sunrise
+   action:
+     service: light.turn_off
+     entity_id: light.Stoop_Light
+
+ - alias: Turn On Jasons Light at 730AM
+   trigger:
+     platform: time
+     at: "07:30:00"
+   action:
+     service: light.turn_on
+     entity_id: light.jason_bedroom
+
+ - alias: Turn Off All Lights At Sunrise
+   trigger:
+     platform: sun
+     event: sunrise
+   action:
+     service: light.turn_off
+     entity_id: group.all_lights
+
+ - alias: Notify TV of Dryer Off
+   trigger:
+     platform: state
+     entity_id: binary_sensor.dryer_status
+     from: 'on'
+     to: 'off'
+   action:
+     service: notify.livingroom_tv
+     data:
+       message: "Dryer Is Finished!"

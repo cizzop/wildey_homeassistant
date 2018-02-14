@@ -1,0 +1,20 @@
+          >
+          {{ [
+          "Yea Whatever Kiki!",
+          "Sure Thing",
+          "If you insist",
+          "It shall be done.",
+          "No worries",
+          "Goodnight Dani. Goodnight Jason. Goodnight Tigger.",
+          "I can do that",
+          "Leave it to me",
+          "Consider it done",
+          "As you wish",
+          "By your command",
+          "Affirmative",
+          "Yes oh revered one",
+          "I will, probably.",
+          "As you decree, so shall it be",
+          "No Problem Dawg",
+          "Dallas Sucks! Fuck Dallas!"
+          ] | random }}
