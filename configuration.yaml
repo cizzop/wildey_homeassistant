@@ -1,0 +1,376 @@
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: Wildey Home
+  # Location required to calculate the time the sun rises and sets
+  latitude: #private
+  longitude: #private
+  # Impacts weather/sunrise data (altitude above sea level in meters)
+  elevation: 11
+  # metric for Metric, imperial for Imperial
+  unit_system: imperial
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: America/New_York
+
+# Show links to resources in log and frontend
+#introduction:
+#test
+# Enables Cloud stuff
+cloud:
+
+# Enables the frontend
+frontend:
+
+# Enables configuration UI
+config:
+
+http:
+  api_password: #private
+  ssl_certificate: #private
+  ssl_key: #private
+  base_url: #private
+  trusted_networks: #private
+  ip_ban_enabled: true
+  login_attempts_threshold: 5
+  # Uncomment this if you are using SSL or running in Docker etc
+  # base_url: example.duckdns.org:8123
+
+# Checks for available updates
+# Note: This component will send some information about your system to
+# the developers to assist with development of Home Assistant.
+# For more information, please see:
+# https://home-assistant.io/blog/2016/10/25/explaining-the-updater/
+updater:
+  # Optional, allows Home Assistant developers to focus on popular components.
+  # include_used_components: true
+
+# Discover some devices automatically
+discovery:
+
+#for dani's phone app
+ios:
+
+# Allows you to issue voice commands from the frontend in enabled browsers
+#conversation:
+#    bedroom_lights_on:
+#        sentence: turn on bedroom lights
+#        action:
+#            service: light.turn_on
+#            entity_id:
+#             - light.jason_bedroom
+#             - light.dani_bedroom
+#    bedroom_lights_off:
+#        sentence: turn off bedroom lights
+#        action:
+#            service: light.turn_off
+#            entity_id:
+#             - light.jason_bedroom
+#             - light.dani_bedroom
+
+# Enables support for tracking state changes over time.
+history:
+
+# View all events in a logbook
+logbook:
+
+# Track the sun
+#sun:
+alexa:
+
+intent_script:
+  ActivateSceneIntent:
+    action:
+      service: scene.turn_on
+      data_template:
+        entity_id: scene.{{ Scene | replace(" ", "")}}
+    speech:
+      type: plain
+      text: !include alexa_confirm.yaml
+
+#notification stuff
+notify:
+  - platform: webostv
+    host: #private
+    name: livingroom_tv
+    filename: webostv.conf
+
+#mqtt
+mqtt:
+  broker: #private
+  port: 1883
+
+# Weather Prediction
+sensor:
+ - platform: yr
+ #esp8266 Bedroom Temp
+ - platform: mqtt
+   broker: #private
+   port: 1883
+   name: 'Bedroom Temp'
+   state_topic: '/office/temperature'
+   unit_of_measurement: '°F'
+   retain: true
+ #esp8266 dryer temp
+ - platform: mqtt
+   broker: #private
+   port: 1883
+   name: 'Dryer Temp'
+   state_topic: '/appliance/dryer/temperature'
+   unit_of_measurement: '°F'
+   retain: true
+ - platform: mqtt
+   broker: #private
+   port: 1883
+   name: 'Dryer Runtime'
+   state_topic: '/appliance/dryer/runtime'
+   unit_of_measurement: 'min'
+   retain: true
+ - platform: darksky
+   api_key: #private
+   monitored_conditions:
+     - summary
+     - temperature
+     - icon
+     - nearest_storm_distance
+ - platform: steam_online
+   api_key: #private
+   accounts:
+     - #private
+
+# Text to speech
+tts:
+  platform: google
+
+#scripts for restarting and shit
+script:
+  restart_ha:
+    alias: Restart HomeAssistant
+    sequence:
+      - alias: Restart HA
+        service: homeassistant.restart
+
+  reload_automations:
+    alias: Reload Automations
+    sequence:
+      - alias: Reload-Automations
+        service: automation.reload
+
+  flash_things:
+    alias: Flash Lights
+    sequence:
+      - alias: Flash Livingroom Light
+        service: light.turn_on
+        data:
+          entity_id: light.hue_color
+          flash: short
+
+#nest
+nest:
+  client_id: #private
+  client_secret: #private
+
+#lets us know if we are home or not
+device_tracker:
+ - platform: nmap_tracker
+   interval_seconds: 60
+   consider_home: 180
+   hosts: #private
+
+#mqtt is used for smart-things
+light:
+  - platform: hue
+    host: #private
+  - platform: mqtt
+    broker: #private
+    port: 1833
+    name: "Office Lamp"
+    brightness_scale: 100
+    state_topic: "smartthings/Office Lamp/switch"
+    command_topic: "smartthings/Office Lamp/switch"
+    brightness_state_topic: "smartthings/Office Lamp/level"
+    brightness_command_topic: "smartthings/Office Lamp/level"
+    payload_on: "on"
+    payload_off: "off"
+    retain: true
+  - platform: mqtt
+    broker: #private
+    port: 1833
+    name: "Stoop Light"
+    brightness_scale: 100
+    state_topic: "smartthings/Stoop Light/switch"
+    command_topic: "smartthings/Stoop Light/switch"
+    brightness_state_topic: "smartthings/Stoop Light/level"
+    brightness_command_topic: "smartthings/Stoop Light/level"
+    payload_on: "on"
+    payload_off: "off"
+    retain: true
+
+#smartthings front door lock
+lock:
+  - platform: mqtt
+    broker: #private
+    port: 1833
+    name: "Front Door"
+    state_topic: "smartthings/Front Door/lock"
+    command_topic: "smartthings/Front Door/lock"
+    payload_lock: "locked"
+    payload_unlock: "unlocked"
+    retain: "true"
+#gets zwave up and running. not really used at the moment.
+#zwave:
+#  usb_path: /dev/ttyACM0
+#  config_path: /srv/homeassistant/lib/python3.4/site-packages/python_openzwave/ozw_config
+  #config_path: ozw_config
+#  new_entity_ids: true
+
+#binary sensors for esp8266 dryer status
+binary_sensor:
+  - platform: mqtt
+    state_topic: "/appliance/dryer/status"
+    name: "Dryer Status"
+    payload_on: 1
+    payload_off: 0
+
+#webcams
+camera:
+  - platform: local_file
+    name: OfficeCam1
+    file_path: /tmp/snapshot1.jpg
+  - platform: local_file
+    name: OfficeCam2
+    file_path: /tmp/snapshot2.jpg
+
+#media players
+media_player:
+  - platform: spotify
+    client_id: #private
+    client_secret: #private
+
+#scenes for use with alexa
+scene:
+  - name: goodnight
+    entities:
+      light.office_lamp:
+        state: on
+        brightness: 25
+      light.office_hue_color:
+        state: off
+      light.livingroom_hue_color:
+        state: off
+      light.jason_bedroom:
+        state: on
+        brightness: 50
+      light.dani_bedroom:
+        state: on
+        brightness: 50
+      lock.front_door: locked
+
+#groups
+group:
+  default_view:
+    view: yes
+    icon: mdi:home
+    entities:
+      - device_tracker.danis_iphone
+      - device_tracker.jasons_phone
+      - sensor.steam_76561197962229962
+      - group.bedroomlights
+      - climate.downstairs
+      - group.livingroomlights
+      - group.officelights
+      - lock.Front_Door
+      - group.themostat
+      - group.darkskyinfo
+      - group.stooplight
+      - group.dryerstatus
+  livingroom:
+    name: Living Room
+    view: yes
+    entities:
+      - light.hue_color
+      - light.Stoop_Light
+      - lock.Front_Door
+      - sensor.downstairs_thermostat_temperature
+      - sensor.downstairs_thermostat_target
+      - sensor.downstairs_thermostat_humidity
+      - binary_sensor.downstairs_thermostat_fan
+      - climate.downstairs
+      - media_player.hambox
+  bedroom:
+    name: Bedroom
+    view: yes
+    entities:
+      - light.dani_bedroom
+      - light.jason_bedroom
+      - sensor.bedroom_temp
+  office:
+    name: Office
+    view: yes
+    entities:
+      - camera.officecam1
+      - script.reload_automations
+      - script.restart_ha
+      - script.flash_things
+  automations:
+    name: Automations & Scripts
+    view: yes
+    entities:
+      - automation.turn_off_all_lights_when_not_home
+      - automation.turn_off_stoop_light_at_sunrise
+      - automation.turn_on_stoop_light_at_sunset
+      - automation.turn_on_jasons_light_at_730am
+      - automation.turn_off_all_lights_at_sunrise
+      - automation.notify_tv_of_dryer_off
+      - group.all_automations
+      - group.all_scripts
+  jason:
+    name: Jason
+    view: yes
+    entities:
+      - sensor.steam_76561197962229962
+      - media_player.spotify
+  bedroomlights:
+    name: Bedroom Lights
+    view: no
+    entities:
+      - light.dani_bedroom
+      - light.jason_bedroom
+  livingroomlights:
+    name: Livingroom Lights
+    view: no
+    entities:
+      - light.livingroom_hue_color
+  officelights:
+    name: Office Lights
+    view: no
+    entities:
+      - light.Office_Lamp
+      - light.office_hue_color
+  stooplight:
+    name: Stoop Light
+    view: no
+    entities:
+      - light.Stoop_Light
+  themostat:
+    name: Thermostat
+    view: no
+    entities:
+      - sensor.downstairs_thermostat_temperature
+      - sensor.downstairs_thermostat_target
+      - sensor.downstairs_thermostat_humidity
+      - sensor.bedroom_temp
+  dryerstatus:
+    name: Dryer Status
+    view: no
+    entities:
+      - binary_sensor.dryer_status
+      - sensor.dryer_runtime
+      - sensor.dryer_temp
+  darkskyinfo:
+    name: Outdoor climate
+    view: no
+    entities:
+      - sensor.dark_sky_summary
+      - sensor.dark_sky_temperature
+
+#group: !include groups.yaml
+automation: !include automations.yaml
