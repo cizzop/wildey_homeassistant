@@ -1,0 +1,20 @@
+light.sonoff_bedroom:
+  icon: mdi:lava-lamp
+person.jason:
+  icon: mdi:emoticon-cool-outline
+device_tracker.pixel_3:
+  icon: mdi:cellphone-android
+switch.auxiliary:
+  icon: mdi:air-humidifier
+switch.sonoff_livingroom:
+  icon: mdi:air-filter
+switch.bedroom_air_filter:
+  icon: mdi:air-filter
+switch.water_valve:
+  icon: mdi:valve
+light.stoop_light:
+  icon: mdi:coach-lamp
+sensor.dryer_runtime:
+  icon: mdi:clock-outline
+binary_sensor.dryer_status:
+  icon: mdi:tumble-dryer

@@ -1,53 +1,368 @@
- - alias: Turn off all lights when not home
-   trigger:
-     entity_id: group.all_devices
-     from: home
-     platform: state
-     to: not_home
-   action:
-     service: light.turn_off
-     entity_id: group.bedroomlights
-
- - alias: Turn On Stoop Light At Sunset
-   trigger:
-     platform: sun
-     event: sunset
-     offset: "-00:30:00"
-   action:
-     service: light.turn_on
-     entity_id: light.Stoop_Light
-
- - alias: Turn Off Stoop Light At Sunrise
-   trigger:
-     platform: sun
-     event: sunrise
-   action:
-     service: light.turn_off
-     entity_id: light.Stoop_Light
-
- - alias: Turn On Jasons Light at 730AM
-   trigger:
-     platform: time
-     at: "07:30:00"
-   action:
-     service: light.turn_on
-     entity_id: light.jason_bedroom
-
- - alias: Turn Off All Lights At Sunrise
-   trigger:
-     platform: sun
-     event: sunrise
-   action:
-     service: light.turn_off
-     entity_id: group.all_lights
-
- - alias: Notify TV of Dryer Off
-   trigger:
-     platform: state
-     entity_id: binary_sensor.dryer_status
-     from: 'on'
-     to: 'off'
-   action:
-     service: notify.livingroom_tv
-     data:
-       message: "Dryer Is Finished!"
+- id: '1577782501599'
+  alias: Turn on the stoop when the sun is set
+  description: ''
+  trigger:
+  - event: sunset
+    platform: sun
+  condition: []
+  action:
+  - type: turn_on
+    device_id: 97f965baa819320f6b394d0ac5c064df
+    entity_id: light.stoop_light
+    domain: light
+  mode: single
+- id: '1577782744864'
+  alias: Turn off the lights when the sun rises
+  description: ''
+  trigger:
+  - event: sunrise
+    platform: sun
+  condition: []
+  action:
+  - device_id: 4ff74f0ab7f540cf8fed47ba0ba25dbb
+    domain: light
+    entity_id: light.livingroom_hue_color
+    type: turn_off
+  - type: turn_off
+    device_id: bba6de248c524a1c99f6837b7559394f
+    entity_id: light.north_bedroom
+    domain: light
+  - type: turn_off
+    device_id: 45448894d5fb4378bbd728385bb83fd8
+    entity_id: light.south_bedroom
+    domain: light
+  - device_id: d09a500575ab44988c8e98ca37bace03
+    domain: light
+    entity_id: light.office_hue_color
+    type: turn_off
+  - type: turn_off
+    device_id: 0f9857f7a8c0fba95b2588625a5c0b6a
+    entity_id: light.office_lamp
+    domain: light
+  - device_id: 1160be9ba56a403d89c8765ce9033931
+    domain: light
+    entity_id: light.hutch
+    type: turn_off
+  - type: turn_off
+    device_id: fee0225e01884cd896b3f923f74e79f0
+    entity_id: light.bed_lights
+    domain: light
+  - type: turn_off
+    device_id: 0fc56e453b6e990b63e6a3d58d8a6dba
+    entity_id: switch.mood_lights
+    domain: switch
+  - type: turn_off
+    device_id: 97f965baa819320f6b394d0ac5c064df
+    entity_id: light.stoop_light
+    domain: light
+  mode: single
+- id: rokujawn
+  alias: Roku Air Filter Automation
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: media_player.hambox
+  action:
+  - service_template: "{%- if states.media_player.hambox.state != 'playing' -%}\n\
+      \  switch.turn_on\n{%- else -%}\n  switch.turn_off\n{%- endif %}"
+    entity_id: switch.sonoff_livingroom
+- id: '1579923840400'
+  alias: Vacation Mode - Turn Lights On At Sunset
+  description: ''
+  trigger:
+  - event: sunset
+    platform: sun
+  condition: []
+  action:
+  - alias: ''
+    data:
+      brightness: 255
+    entity_id: light.jason_bedroom
+    service: light.turn_on
+  - alias: ''
+    data:
+      brightness: 255
+    entity_id: light.livingroom_hue_color
+    service: light.turn_on
+- id: '1579924443900'
+  alias: Vacation Mode - Turn Off Jason at 3:30AM
+  description: ''
+  trigger:
+  - at: 03:30
+    platform: time
+  condition: []
+  action:
+  - device_id: 45448894d5fb4378bbd728385bb83fd8
+    domain: light
+    entity_id: light.jason_bedroom
+    type: turn_off
+  - device_id: bba6de248c524a1c99f6837b7559394f
+    domain: light
+    entity_id: light.dani_bedroom
+    type: turn_off
+- id: '1580781111300'
+  alias: Roku Bedroom Air Filter Automation
+  description: ''
+  trigger:
+  - entity_id: media_player.roku_bedroom
+    platform: state
+  condition: []
+  action:
+  - entity_id: switch.bedroom_air_filter
+    service_template: "{%- if states.media_player.roku_bedroom.state != 'playing'\
+      \ -%}\n  switch.turn_on\n{%- else -%}\n  switch.turn_off\n{%- endif %}"
+- id: '1580785702200'
+  alias: Turn on hutch when i get home
+  description: ''
+  trigger:
+  - entity_id: person.jason
+    from: not_home
+    platform: state
+    to: home
+  condition:
+  - after: sunset
+    condition: sun
+  action:
+  - device_id: 1160be9ba56a403d89c8765ce9033931
+    domain: light
+    entity_id: light.hutch
+    type: turn_on
+- id: '1581218427200'
+  alias: Notify Me When Moisture Is Detected
+  description: ''
+  trigger:
+  - entity_id: binary_sensor.furnace_leak_detector
+    from: 'off'
+    platform: state
+    to: 'on'
+    for: 00:01:00
+  - entity_id: binary_sensor.rear_leak_detector
+    from: 'off'
+    platform: state
+    to: 'on'
+    for: 00:01:00
+  condition: []
+  action:
+  - service: notify.mobile_app_pixel_3
+    data:
+      message: Water Leak Detected!
+  - data:
+      brightness: 255
+    service: light.turn_on
+    target:
+      device_id: bba6de248c524a1c99f6837b7559394f
+  - data:
+      brightness: 255
+      rgb_color:
+      - 255
+      - 0
+      - 0
+    entity_id: light.livingroom_hue_color
+    service: light.turn_on
+  mode: single
+- id: '1593293550090'
+  alias: Notify SMS of Washer Off
+  description: ''
+  trigger:
+  - entity_id: binary_sensor.dryer_status
+    from: 'on'
+    platform: state
+    to: 'off'
+  condition: []
+  action:
+  - data:
+      message: 'Dryer Is Finished! Runtime: {{ states.sensor.dryer_runtime.state }}
+        minutes.'
+    service: notify.gmail_notify
+- id: '1606510960895'
+  alias: Turn Holiday Lights On At Sunset
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunset
+  condition: []
+  action:
+  - type: turn_on
+    device_id: 42c4345032deefc53c2a501ef791b454
+    entity_id: switch.holiday_lights_2
+    domain: switch
+  - service: light.turn_on
+    target:
+      entity_id: light.holiday_lights_1
+  mode: single
+- id: '1606511092365'
+  alias: Turn Holiday Lights Off At 2AM
+  description: ''
+  trigger:
+  - platform: time
+    at: 02:00
+  condition: []
+  action:
+  - type: turn_off
+    device_id: 42c4345032deefc53c2a501ef791b454
+    entity_id: switch.holiday_lights_2
+    domain: switch
+  - service: light.turn_off
+    target:
+      entity_id: light.holiday_lights_1
+  mode: single
+- id: '1607127972051'
+  alias: Create Weekly Snapshot
+  description: ''
+  trigger:
+  - platform: time
+    at: 02:00:00
+  condition:
+  - condition: time
+    weekday:
+    - sun
+  action:
+  - service: hassio.snapshot_full
+    data:
+      name: weekly_backup_{{ now().strftime('%Y-%m-%d') }}
+  mode: single
+- id: '1607128401206'
+  alias: Backup Weekly Snapshot To Dropbox
+  description: ''
+  trigger:
+  - platform: time
+    at: 02:30:00
+  condition:
+  - condition: time
+    weekday:
+    - sun
+  action:
+  - service: hassio.addon_stdin
+    data:
+      addon: 7be23ff5_dropbox_sync
+      input:
+        command: upload
+  mode: single
+- id: '1612157576209'
+  alias: Turn off Printer Lights
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.ender3v2_state
+    from: printing
+    to: complete
+  condition: []
+  action:
+  - type: turn_off
+    device_id: 7b3cdd8afaee4aedbe2a90ea70b32560
+    entity_id: switch.printer_light
+    domain: switch
+  mode: single
+- id: '1619046403759'
+  alias: Turn off Printer
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.ender3v2_state
+    from: printing
+    to: complete
+    for: 00:15:00
+  condition: []
+  action:
+  - type: turn_off
+    device_id: e2c5c6a9208e1c116c950d45ef77fcf6
+    entity_id: switch.3d_printer
+    domain: switch
+  mode: single
+- id: '1630257632256'
+  alias: Turn Off AC
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.kphl_temperature
+    from: '-99'
+    to: '70'
+  condition:
+  - condition: state
+    entity_id: climate.downstairs
+    attribute: preset_modes
+    state: none
+  action:
+  - device_id: 452088d4820d7c7efc9954aa3232054c
+    domain: climate
+    entity_id: climate.downstairs
+    type: set_preset_mode
+    preset_mode: eco
+  - service: notify.mobile_app_pixel_3
+    data:
+      message: AC turned off automatically
+  mode: restart
+- id: '1630298729336'
+  alias: Test Notifications
+  description: ''
+  trigger:
+  - type: turned_on
+    platform: device
+    device_id: 7b3cdd8afaee4aedbe2a90ea70b32560
+    entity_id: binary_sensor.printer_light_button1
+    domain: binary_sensor
+  condition: []
+  action:
+  - service: notify.mobile_app_pixel_3
+    data:
+      message: Test Notification!
+  mode: single
+- id: '1630380969236'
+  alias: Arm Blink When Away
+  description: ''
+  trigger:
+  - platform: zone
+    entity_id: person.jason
+    zone: zone.home
+    event: leave
+  condition: []
+  action:
+  - service: alarm_control_panel.alarm_arm_away
+    target:
+      entity_id: alarm_control_panel.blink_wildey
+  mode: single
+- id: '1630381212872'
+  alias: Disarm Blink When Home
+  description: ''
+  trigger:
+  - platform: zone
+    entity_id: person.jason
+    zone: zone.home
+    event: enter
+  condition: []
+  action:
+  - service: alarm_control_panel.alarm_disarm
+    target:
+      entity_id: alarm_control_panel.blink_wildey
+  mode: single
+- id: '1637202550887'
+  alias: Tag Arrived Home is scanned
+  description: ''
+  trigger:
+  - platform: tag
+    tag_id: 825c4e78-6dc8-4d88-91da-491f04102899
+  condition: []
+  action:
+  - scene: scene.night_home
+  mode: single
+- id: '1638323342339'
+  alias: Set Nest to Eco when Jason leaves
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: person.jason
+    from: home
+    to: not_home
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
+      milliseconds: 0
+  condition: []
+  action:
+  - device_id: 452088d4820d7c7efc9954aa3232054c
+    domain: climate
+    entity_id: climate.downstairs
+    type: set_preset_mode
+    preset_mode: eco
+  mode: single
